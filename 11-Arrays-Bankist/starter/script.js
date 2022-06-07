@@ -10,6 +10,18 @@ const account1 = {
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
   interestRate: 1.2, // %
   pin: 1111,
+  movementsDates: [
+    '2019-11-18T21:31:17.178Z',
+    '2019-12-23T07:42:02.383Z',
+    '2020-01-28T09:15:04.904Z',
+    '2020-04-01T10:17:24.185Z',
+    '2020-05-08T14:11:59.604Z',
+    '2020-05-27T17:01:17.194Z',
+    '2022-06-05T23:36:17.929Z',
+    '2022-06-06T10:51:36.790Z',
+  ],
+  currency: 'EUR',
+  locale: 'pt-PT',
 };
 
 const account2 = {
@@ -17,6 +29,18 @@ const account2 = {
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
+  movementsDates: [
+    '2019-11-01T13:15:33.035Z',
+    '2019-11-30T09:48:16.867Z',
+    '2019-12-25T06:04:23.907Z',
+    '2020-01-25T14:18:46.235Z',
+    '2020-02-05T16:33:06.386Z',
+    '2020-04-10T14:43:26.374Z',
+    '2020-06-25T18:49:59.371Z',
+    '2020-07-26T12:01:20.894Z',
+  ],
+  currency: 'USD',
+  locale: 'en-US',
 };
 
 const account3 = {
@@ -24,6 +48,18 @@ const account3 = {
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
   pin: 3333,
+  movementsDates: [
+    '2018-11-01T13:15:33.035Z',
+    '2017-11-30T09:48:16.867Z',
+    '2017-12-25T06:04:23.907Z',
+    '2021-01-25T14:18:46.235Z',
+    '2020-02-05T16:33:06.386Z',
+    '2020-04-10T14:43:26.374Z',
+    '2021-06-25T18:49:59.371Z',
+    '2021-07-26T12:01:20.894Z',
+  ],
+  currency: 'USD',
+  locale: 'en-US',
 };
 
 const account4 = {
@@ -31,6 +67,18 @@ const account4 = {
   movements: [430, 1000, 700, 50, 90],
   interestRate: 1,
   pin: 4444,
+  movementsDates: [
+    '2019-11-18T21:31:17.178Z',
+    '2018-12-23T07:42:02.383Z',
+    '2020-01-29T09:15:04.904Z',
+    '2020-04-01T10:27:24.185Z',
+    '2020-05-08T14:21:59.604Z',
+    '2020-06-27T17:11:17.194Z',
+    '2020-07-12T23:36:17.929Z',
+    '2021-07-13T10:51:36.790Z',
+  ],
+  currency: 'EUR',
+  locale: 'pt-PT',
 };
 
 const accounts = [account1, account2, account3, account4];
@@ -71,23 +119,71 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
 
+//fake always log in
+// currentAccount = account1;
+// updateUI(currentAccount);
+// containerApp.style.opacity = 100;
+
+//
+const daysPassed = (date1, date2) =>
+  Math.round(Math.abs(date1 - (date2 / 1000) * 60 * 60 * 24));
+const FormateDate = function (date, mov = false) {
+  if (mov === false) {
+    const days = daysPassed(new Date(), date);
+    if (days === 0) {
+      return `Today`;
+    }
+    if (days === 1) {
+      return `Yesterday`;
+    }
+    const day = `${date.getDate()}`.padStart(2, 0);
+    const month = `${date.getMonth() + 1}`.padStart(2, 0);
+    const year = date.getFullYear();
+    const hour = `${date.getHours()}`.padStart(2, 0);
+    const minutes = `${date.getMinutes()}`.padStart(2, 0);
+    return `${day}/${month}/${year}, ${hour}:${minutes}`;
+  } else {
+    const days = daysPassed(new Date(), date);
+    if (days === 0) {
+      return `Today`;
+    }
+    if (days === 1) {
+      return `Yesterday`;
+    }
+    const day = `${date.getDate()}`.padStart(2, 0);
+    const month = `${date.getMonth() + 1}`.padStart(2, 0);
+    const year = date.getFullYear();
+    const hour = `${date.getHours()}`.padStart(2, 0);
+    const minutes = `${date.getMinutes()}`.padStart(2, 0);
+    return `${day}/${month}/${year}`;
+  }
+};
+
+const now = new Date();
+
+labelDate.textContent = FormateDate(now);
+//day/month/year
+
 //based on the sort variable, we will sort the movements or not.
-const displayMovements = function (movements, sort = false) {
+const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = '';
   //ascending order
   // const SortedMovements = sort
   //   ? movements.slice().sort((a, b) => a - b)
   //   : movements;
   const sortedMovements = sort
-    ? movements.slice().sort((a, b) => a - b)
-    : movements;
+    ? acc.movements.slice().sort((a, b) => a - b)
+    : acc.movements;
   sortedMovements.forEach(function (mov, i) {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
+    const date = new Date(acc.movementsDates[i]);
+
+    let displayDate = FormateDate(date, true);
     const html = `
     <div class="movements__row">
     <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
-    
-    <div class="movements__value">${mov}€</div>
+    <div class="movements__date">${displayDate}</div>
+    <div class="movements__value">${mov.toFixed(2)}€</div>
     </div>
     
     `;
@@ -111,19 +207,19 @@ const calcDisplaySummary = function (account) {
   const incomes = account.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumIn.textContent = `${incomes}€`;
+  labelSumIn.textContent = `${incomes.toFixed(2)}€`;
 
   const outs = account.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumOut.textContent = `${Math.abs(outs)}€`;
+  labelSumOut.textContent = `${Math.abs(outs).toFixed(2)}€`;
 
   const interests = account.movements
     .filter(mov => mov > 0)
     .map(mov => (mov * account.interestRate) / 100)
     .filter(interest => interest > 1)
     .reduce((acc, interest) => acc + interest, 0);
-  labelSumInterest.textContent = `${interests}€`;
+  labelSumInterest.textContent = `${interests.toFixed(2)}€`;
 };
 
 createUsernames(accounts);
@@ -133,11 +229,11 @@ const euroToUsd = 1.1;
 const calcAndDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce((acc, cur) => acc + cur, 0);
 
-  labelBalance.textContent = `${acc.balance}EUR`;
+  labelBalance.textContent = `${acc.balance.toFixed(2)}EUR`;
 };
 
 const updateUI = function (currentAccount) {
-  displayMovements(currentAccount.movements);
+  displayMovements(currentAccount);
 
   //display balance
   calcAndDisplayBalance(currentAccount);
@@ -183,7 +279,7 @@ let sorted = false;
 btnSort.addEventListener('click', function (e) {
   e.preventDefault();
   //sorted = !sorted;
-  displayMovements(currentAccount.movements, !sorted);
+  displayMovements(currentAccount, !sorted);
   sorted = !sorted;
 });
 
@@ -207,6 +303,9 @@ btnTransfer.addEventListener('click', function (e) {
     console.log('Transfer valid');
     currentAccount.movements.push(-amount);
     receiverAcc.movements.push(amount);
+    //add transfer date
+    currentAccount.movementsDates.push(new Date().toISOString());
+    receiverAcc.movementsDates.push(new Date().toISOString());
     updateUI(currentAccount);
   }
 });
@@ -231,9 +330,10 @@ btnClose.addEventListener('click', function (e) {
 
 btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
-  const amount = Number(inputLoanAmount.value);
+  const amount = Math.floor(inputLoanAmount.value);
   if (amount > 0 && currentAccount.movements.some(mov => mov >= amount / 10)) {
     currentAccount.movements.push(amount);
+    currentAccount.movementsDates.push(new Date().toISOString());
     updateUI(currentAccount);
   }
   inputLoanAmount.value = '';
@@ -445,25 +545,25 @@ const dogs = [
 GOOD LUCK 😀
 */
 
-const dogs = [
-  { weight: 22, curFood: 250, owners: ['Alice', 'Bob'] },
-  { weight: 8, curFood: 200, owners: ['Matilda'] },
-  { weight: 13, curFood: 275, owners: ['Sarah', 'John'] },
-  { weight: 32, curFood: 340, owners: ['Michael'] },
-];
-//recommendedFood = weight ** 0.75 * 28
+// const dogs = [
+//   { weight: 22, curFood: 250, owners: ['Alice', 'Bob'] },
+//   { weight: 8, curFood: 200, owners: ['Matilda'] },
+//   { weight: 13, curFood: 275, owners: ['Sarah', 'John'] },
+//   { weight: 32, curFood: 340, owners: ['Michael'] },
+// ];
+// //recommendedFood = weight ** 0.75 * 28
 
-const calcRecommendFood = function (weight) {
-  return Math.trunc(weight ** 0.75 * 28);
-};
-console.log(calcRecommendFood(13));
+// const calcRecommendFood = function (weight) {
+//   return Math.trunc(weight ** 0.75 * 28);
+// };
+// console.log(calcRecommendFood(13));
 
-//1.
-//dogs.forEach(dog => console.log(dog.weight));
-dogs.forEach(
-  dog => (dog.recommendFood = calcRecommendFood(dog.weight).toFixed(2))
-);
-console.log(dogs);
+// //1.
+// //dogs.forEach(dog => console.log(dog.weight));
+// dogs.forEach(
+//   dog => (dog.recommendFood = calcRecommendFood(dog.weight).toFixed(2))
+// );
+// console.log(dogs);
 //2.
 
 // const findResult = dogs.find(d => {
@@ -480,19 +580,19 @@ console.log(dogs);
 // }
 
 //3.
-const ownersEatTooLittle = dogs
-  .filter(dog => dog.recommendFood > dog.curFood)
-  .flatMap(dog => dog.owners);
-const ownersEatTooMuch = dogs
-  .filter(dog => dog.recommendFood < dog.curFood)
-  .flatMap(dog => dog.owners);
+// const ownersEatTooLittle = dogs
+//   .filter(dog => dog.recommendFood > dog.curFood)
+//   .flatMap(dog => dog.owners);
+// const ownersEatTooMuch = dogs
+//   .filter(dog => dog.recommendFood < dog.curFood)
+//   .flatMap(dog => dog.owners);
 
-console.log(ownersEatTooMuch);
-console.log(ownersEatTooLittle);
+// console.log(ownersEatTooMuch);
+// console.log(ownersEatTooLittle);
 
-//4.
-console.log(`${ownersEatTooLittle.join(' and ')} eat too little`);
-console.log(`${ownersEatTooMuch.join(' and ')} eat too much`);
+// //4.
+// console.log(`${ownersEatTooLittle.join(' and ')} eat too little`);
+// console.log(`${ownersEatTooMuch.join(' and ')} eat too much`);
 
 //5.
 
@@ -500,26 +600,45 @@ console.log(`${ownersEatTooMuch.join(' and ')} eat too much`);
 // console.log(result);
 
 //6
-const result = dogs.some(
-  dog =>
-    dog.curFood >= dog.recommendFood * 0.9 &&
-    dog.curFood <= dog.recommendFood * 1.1
-);
-console.log(result);
+// const result = dogs.some(
+//   dog =>
+//     dog.curFood >= dog.recommendFood * 0.9 &&
+//     dog.curFood <= dog.recommendFood * 1.1
+// );
+// console.log(result);
 
 //7.
 
-const checkEatingOkay = dog =>
-  dog.curFood >= dog.recommendFood * 0.9 &&
-  dog.curFood <= dog.recommendFood * 1.1;
+// const checkEatingOkay = dog =>
+//   dog.curFood >= dog.recommendFood * 0.9 &&
+//   dog.curFood <= dog.recommendFood * 1.1;
 
-const OKDog = dogs.filter(checkEatingOkay);
-console.log(OKDog);
+// const OKDog = dogs.filter(checkEatingOkay);
+// console.log(OKDog);
 
 //8.
 // const y = Array.from({ length: 7 }, (_, b) => b * 3);
 
-const newDogs = Array.from(dogs).sort((pre, cur) => {
-  return pre.recommendFood - cur.recommendFood;
-});
-console.log(newDogs);
+// const newDogs = Array.from(dogs).sort((pre, cur) => {
+//   return pre.recommendFood - cur.recommendFood;
+// });
+// console.log(newDogs);
+
+//Date and Time
+
+// const now = new Date();
+// console.log(now);
+
+// //parse a date from a string
+// console.log(new Date('Aug 02 2020 18:05:41'));
+// console.log(new Date(account1.movementsDates[0]));
+// console.log(new Date(5));
+
+// //working with dates
+// const future = new Date(2037, 10, 19, 15, 23);
+// console.log(future);
+// console.log(future.getFullYear());
+// console.log(future.getMonth());
+// console.log(future.getDate());
+// future.setFullYear(2046);
+// console.log(future);
