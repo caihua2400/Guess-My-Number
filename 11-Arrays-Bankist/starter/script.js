@@ -159,9 +159,6 @@ const FormateDate = function (date, mov = false) {
   }
 };
 
-const now = new Date();
-
-labelDate.textContent = FormateDate(now);
 //day/month/year
 
 //based on the sort variable, we will sort the movements or not.
@@ -250,7 +247,8 @@ const updateUI = function (currentAccount) {
 //Then we add negative moment to the current user and add positive moment to the receiver account.
 // Then we update the UI.
 
-let currentAccount;
+let currentAccount = {},
+  Clocker;
 btnLogin.addEventListener('click', function (e) {
   //prevent form from submitting.
   e.preventDefault();
@@ -270,6 +268,9 @@ btnLogin.addEventListener('click', function (e) {
     //clear the input fields and lose focus.
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
+    //
+    if (Clocker) clearInterval(Clocker);
+    Clocker = startLogoutTimer();
     updateUI(currentAccount);
     console.log('Login success');
   }
@@ -307,6 +308,8 @@ btnTransfer.addEventListener('click', function (e) {
     currentAccount.movementsDates.push(new Date().toISOString());
     receiverAcc.movementsDates.push(new Date().toISOString());
     updateUI(currentAccount);
+    clearInterval(Clocker);
+    Clocker = startLogoutTimer();
   }
 });
 
@@ -337,8 +340,50 @@ btnLoan.addEventListener('click', function (e) {
     updateUI(currentAccount);
   }
   inputLoanAmount.value = '';
+  clearInterval(Clocker);
+  Clocker = startLogoutTimer();
 });
+const now = new Date();
 
+const startLogoutTimer = function () {
+  //set time to five minutes.
+  let time = 30;
+
+  //call the timer every second.
+  const Clocker = setInterval(function () {
+    const min = String(Math.trunc(time / 60)).padStart(2, '0');
+    const sec = String(time % 60).padStart(2, '0');
+
+    labelTimer.textContent = `${min}:${sec}`;
+    //decrease 1s.
+    time = time - 1;
+    if (time === 0) {
+      clearInterval(Clocker);
+      labelWelcome.textContent = 'Log in to get started';
+      containerApp.style.opacity = 0;
+    }
+  }, 1000);
+  //In each call, printing the remaining time to UI.
+  //when 0 seconds, stop timer and log out user.
+  return Clocker;
+};
+
+const options = {
+  hour: 'numeric',
+  minute: 'numeric',
+  day: 'numeric',
+  month: 'numeric',
+  year: 'numeric',
+  //weekday: 'long',
+};
+
+labelDate.textContent = new Intl.DateTimeFormat(
+  currentAccount.locale,
+  options
+).format(now);
+
+const num = 3884764.23;
+console.log(new Intl.NumberFormat('en-us').format(num));
 // let sorted = false;
 // btnSort.addEventListener('click', function (e) {
 //   e.preventDefault();
@@ -642,3 +687,17 @@ GOOD LUCK 😀
 // console.log(future.getDate());
 // future.setFullYear(2046);
 // console.log(future);
+// const ingreds = ['apple', 'spinach'];
+
+// const startTime = setTimeout(
+//   (x, y) => console.log(`here is your pizza. ${x},${y}`),
+//   5000,
+
+//   ...ingreds
+// );
+// if (ingreds.includes('spinach')) {
+//   clearTimeout(startTime);
+//   console.log('Timer cancled');
+// }
+
+// setInterval(() => console.log('Hello World'), 2000);
