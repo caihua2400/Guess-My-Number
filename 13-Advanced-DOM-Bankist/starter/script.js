@@ -200,12 +200,57 @@ nav.addEventListener('mouseover', handover.bind(0.5));
 nav.addEventListener('mouseout', handover.bind(1));
 
 //sticky navigation
-const initialCoords = section1.getBoundingClientRect();
-window.addEventListener('scroll', function (e) {
-  console.log(window.scrollY);
-  if (window.scrollY > initialCoords.top) {
-    nav.classList.add('sticky');
-  } else {
-    nav.classList.remove('sticky');
-  }
+// const initialCoords = section1.getBoundingClientRect();
+// window.addEventListener('scroll', function (e) {
+//   //console.log(window.scrollY);
+//   if (window.scrollY > initialCoords.top) {
+//     nav.classList.add('sticky');
+//   } else {
+//     nav.classList.remove('sticky');
+//   }
+// });
+
+//the callback function will be called whenever the target element(section1) has intercepted with the viewpoint in 10%
+// const obsCallback = function (entries, observer) {
+//   entries.forEach(entry => {
+//     console.log(entry);
+//   });
+// };
+// const obsOption = {
+//   root: null,
+//   threshhold: [0, 0.2],
+// };
+// const observer = new IntersectionObserver(obsCallback, obsOption);
+// observer.observe(section1);
+const header = document.querySelector('.header');
+const navHeight = nav.getBoundingClientRect().height;
+const stickyNav = function (entries) {
+  const [entry] = entries;
+  console.log(entry);
+  if (!entry.isIntersecting) nav.classList.add('sticky');
+  else nav.classList.remove('sticky');
+};
+const headerObserver = new IntersectionObserver(stickyNav, {
+  root: null,
+  threshhold: 0,
+  rootMargin: `-${navHeight}px`,
+});
+headerObserver.observe(header);
+
+//reveal sections
+const allSelections = document.querySelectorAll('.section');
+const revealSection = function (entries, observer) {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    entry.target.classList.remove('section--hidden');
+  });
+  //
+};
+const sectionObserver = new IntersectionObserver(revealSection, {
+  root: null,
+  threshhold: 0.15,
+});
+allSelections.forEach(function (section) {
+  sectionObserver.observe(section);
+  section.classList.add('section--hidden');
 });
